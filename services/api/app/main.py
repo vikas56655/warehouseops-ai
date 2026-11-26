@@ -4,7 +4,9 @@ from app.config import settings
 from app.db import check_database
 from app.routers.metrics import router as metrics_router
 
-app = FastAPI(title="WarehouseOps AI API", version="0.1.0")
+from app.routers.operations import router as operations_router
+
+app = FastAPI(title="WarehouseOps AI API", version="0.2.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[s.strip() for s in settings.cors_origins.split(",") if s.strip()],
@@ -13,6 +15,7 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 app.include_router(metrics_router)
+app.include_router(operations_router)
 
 @app.get("/health/live")
 def liveness() -> dict[str, str]:
