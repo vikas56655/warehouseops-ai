@@ -5,6 +5,22 @@ on:
 jobs:
   api:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: warehouseops
+          POSTGRES_PASSWORD: localtest
+          POSTGRES_DB: warehouseops
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U warehouseops"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://warehouseops:localtest@localhost:5432/warehouseops
     defaults:
       run:
         working-directory: services/api
@@ -16,6 +32,28 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - run: ruff check app tests
       - run: pytest -q
+      - run: alembic upgrade head
+      - run: python -m app.import_events data/demo_events.csv
+      - name: PostgreSQL and API smoke test
+        run: |
+          python - <<'PY'
+          from fastapi.testclient import TestClient
+          from app.main import app
+          client = TestClient(app)
+          assert client.get('/health/ready').status_code == 200
+          response = client.get('/api/v1/operations/summary')
+          assert response.status_code == 200
+          zones = response.json()['zones']
+          assert sum(z['units'] for z in zones) == 132
+          assert sum(z['colis'] for z in zones) == 16
+          for season in ('summer', 'winter'):
+              response = client.get('/api/v1/simulation/run', params={'season': season})
+              assert response.status_code == 200
+              data = response.json()
+              assert data['arrived'] == data['completed'] + data['backlog']
+              assert data['provenance'] == 'synthetic_demo'
+          print('PostgreSQL and simulation API smoke checks passed')
+          PY
   web:
     runs-on: ubuntu-latest
     defaults:
