@@ -2,10 +2,10 @@
 
 > Agentic warehouse operations intelligence — production-oriented engineering portfolio project.
 
-**Status:** Week 3 simulator foundation. This is a working starter scaffold, **not** a completed AI platform.
+**Status:** Week 4 interactive Control Tower (runtime verification pending). This is a working starter scaffold, **not** a completed AI platform.
 
 ## What is implemented
-- Next.js 15 / React 19 responsive dark Control Tower UI
+- Next.js 15 / React 19 responsive light Control Tower UI
 - FastAPI typed REST endpoint `/api/v1/metrics`
 - Liveness `/health/live` and database readiness `/health/ready`
 - PostgreSQL 16 service, Docker Compose, example environment configuration
@@ -78,7 +78,7 @@ docker compose exec api python -m app.import_events data/demo_events.csv
 curl http://localhost:8000/api/v1/operations/summary
 ```
 
-The importer validates timezone-aware timestamps, zone, units, colis, duration and provenance using Pydantic, rejects duplicate IDs and persists events with SQLAlchemy. The read-only summary groups by zone and provenance and computes units per recorded activity hour (not employee productivity). Schema initialization uses Alembic; public dataset adapters and richer inventory/order tables remain pending. The existing dashboard still uses synthetic metrics. Tests use SQLite; PostgreSQL integration and CI verification remain outstanding.
+The importer validates timezone-aware timestamps, zone, units, colis, duration and provenance using Pydantic, rejects duplicate IDs and persists events with SQLAlchemy. The read-only summary groups by zone and provenance and computes units per recorded activity hour (not employee productivity). Schema initialization uses Alembic; public dataset adapters and richer inventory/order tables remain pending. The dashboard now fetches simulation results and imported operational summaries. Tests use SQLite; PostgreSQL integration and CI verification remain outstanding.
 
 ## Week 3: synthetic discrete-event simulator
 
@@ -87,4 +87,8 @@ curl 'http://localhost:8000/api/v1/simulation/run?season=winter&pickers=5&seed=4
 curl 'http://localhost:8000/api/v1/simulation/run?season=summer&pickers=5&seed=42'
 ```
 
-The SimPy model covers reception, picking and dispatch, with configurable staffing, arrival rate, shift length and season. Outputs include backlog, throughput, cycle time, resource utilization and peak queue. All parameters are synthetic and uncalibrated. See [assumptions](docs/architecture/simulator.md). Run Alembic before importing events; migration adopts compatible Week 2 starter tables. The simulator does not write to the database. Frontend wiring, public dataset integration and runtime verification remain pending.
+The SimPy model covers reception, picking and dispatch, with configurable staffing, arrival rate, shift length and season. Outputs include backlog, throughput, cycle time, resource utilization and peak queue. All parameters are synthetic and uncalibrated. See [assumptions](docs/architecture/simulator.md). Run Alembic before importing events; migration adopts compatible Week 2 starter tables. The simulator does not write to the database. Public dataset integration and runtime verification remain pending.
+
+## Week 4: interactive Control Tower
+
+Open http://localhost:3000 after `docker compose up --build`. Configure a shift and run the simulation, or compare summer and winter using the same input parameters. The frontend reads the simulation and operations endpoints directly; imported data requires the migration and import commands above. GitHub Actions now includes PostgreSQL 16 migration, import and API smoke checks. Passing CI and browser execution have not yet been confirmed.
