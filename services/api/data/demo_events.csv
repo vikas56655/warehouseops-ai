@@ -1,0 +1,5 @@
+event_id,occurred_at,zone,sku,units,colis,duration_seconds,provenance
+demo-001,2026-01-01T08:00:00Z,picking,SKU-001,24,3,480,synthetic_demo
+demo-002,2026-01-01T08:10:00Z,reception,SKU-002,48,6,600,synthetic_demo
+demo-003,2026-01-01T08:20:00Z,dispatch,SKU-001,24,3,360,synthetic_demo
+demo-004,2026-01-01T08:30:00Z,storage,SKU-003,36,4,540,synthetic_demo
