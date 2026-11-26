@@ -1,11 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.config import settings
 from app.db import check_database
 from app.routers.metrics import router as metrics_router
-
 from app.routers.operations import router as operations_router
-
 from app.routers.simulation import router as simulation_router
 
 app = FastAPI(title="WarehouseOps AI API", version="0.3.0")

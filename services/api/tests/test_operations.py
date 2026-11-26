@@ -7,9 +7,9 @@ from app.operations import Base, Event, ingest, summarize
 
 
 def event(**overrides):
-    data = dict(event_id="e1", occurred_at="2026-01-01T08:00:00Z",
-                zone="picking", sku="DEMO-1", units=10, colis=2,
-                duration_seconds=60, provenance="synthetic_demo")
+    data = {"event_id": "e1", "occurred_at": "2026-01-01T08:00:00Z",
+            "zone": "picking", "sku": "DEMO-1", "units": 10, "colis": 2,
+            "duration_seconds": 60, "provenance": "synthetic_demo"}
     return Event.model_validate(dict(data, **overrides))
 
 
