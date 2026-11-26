@@ -2,7 +2,7 @@
 
 > Agentic warehouse operations intelligence — production-oriented engineering portfolio project.
 
-**Status:** Week 2 data foundation. This is a working starter scaffold, **not** a completed AI platform.
+**Status:** Week 3 simulator foundation. This is a working starter scaffold, **not** a completed AI platform.
 
 ## What is implemented
 - Next.js 15 / React 19 responsive dark Control Tower UI
@@ -12,7 +12,7 @@
 - Backend tests and GitHub Actions CI
 - Explicit `synthetic_demo` provenance on all displayed metrics
 
-**Not implemented yet:** public dataset acquisition, full inventory/order models, versioned migrations, forecasting, LangGraph agents, MCP, human approvals, authentication, or deployment. These are future milestones.
+**Not implemented yet:** public dataset acquisition, full inventory/order models, forecasting, LangGraph agents, MCP, human approvals, authentication, or deployment. These are future milestones.
 
 ## Requirements
 Docker Desktop or Docker Engine with Compose. Ports 3000, 8000, and 5432 available locally.
@@ -73,9 +73,18 @@ License selection pending. Do not assume permission to reuse proprietary dataset
 Import the bundled synthetic dataset into the running database:
 
 ```bash
-docker compose cp services/api/data/demo_events.csv api:/tmp/demo_events.csv
-docker compose exec api python -m app.import_events /tmp/demo_events.csv
+docker compose exec api alembic upgrade head
+docker compose exec api python -m app.import_events data/demo_events.csv
 curl http://localhost:8000/api/v1/operations/summary
 ```
 
-The importer validates timezone-aware timestamps, zone, units, colis, duration and provenance using Pydantic, rejects duplicate IDs and persists events with SQLAlchemy. The read-only summary groups by zone and provenance and computes units per recorded activity hour (not employee productivity). Schema initialization currently uses create_all; Alembic migrations, public dataset adapters and richer inventory/order tables remain pending. The existing dashboard still uses synthetic metrics. Tests use SQLite; PostgreSQL integration and CI verification remain outstanding.
+The importer validates timezone-aware timestamps, zone, units, colis, duration and provenance using Pydantic, rejects duplicate IDs and persists events with SQLAlchemy. The read-only summary groups by zone and provenance and computes units per recorded activity hour (not employee productivity). Schema initialization uses Alembic; public dataset adapters and richer inventory/order tables remain pending. The existing dashboard still uses synthetic metrics. Tests use SQLite; PostgreSQL integration and CI verification remain outstanding.
+
+## Week 3: synthetic discrete-event simulator
+
+```bash
+curl 'http://localhost:8000/api/v1/simulation/run?season=winter&pickers=5&seed=42'
+curl 'http://localhost:8000/api/v1/simulation/run?season=summer&pickers=5&seed=42'
+```
+
+The SimPy model covers reception, picking and dispatch, with configurable staffing, arrival rate, shift length and season. Outputs include backlog, throughput, cycle time, resource utilization and peak queue. All parameters are synthetic and uncalibrated. See [assumptions](docs/architecture/simulator.md). Run Alembic before importing events; migration adopts compatible Week 2 starter tables. The simulator does not write to the database. Frontend wiring, public dataset integration and runtime verification remain pending.
