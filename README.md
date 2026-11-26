@@ -2,7 +2,7 @@
 
 > Agentic warehouse operations intelligence — production-oriented engineering portfolio project.
 
-**Status:** Week 1 foundation. This is a working starter scaffold, **not** a completed AI platform.
+**Status:** Week 2 data foundation. This is a working starter scaffold, **not** a completed AI platform.
 
 ## What is implemented
 - Next.js 15 / React 19 responsive dark Control Tower UI
@@ -12,7 +12,7 @@
 - Backend tests and GitHub Actions CI
 - Explicit `synthetic_demo` provenance on all displayed metrics
 
-**Not implemented yet:** real data ingestion, persisted business models, forecasting, LangGraph agents, MCP, human approvals, authentication, or deployment. These are future milestones.
+**Not implemented yet:** public dataset acquisition, full inventory/order models, versioned migrations, forecasting, LangGraph agents, MCP, human approvals, authentication, or deployment. These are future milestones.
 
 ## Requirements
 Docker Desktop or Docker Engine with Compose. Ports 3000, 8000, and 5432 available locally.
@@ -53,7 +53,7 @@ No employer-internal data, personal worker records, or private operational metri
 
 ## Roadmap
 1. Foundation (this release)
-2. Public dataset ingestion and canonical data model
+2. Canonical event model and CSV ingestion (partial: public dataset acquisition pending)
 3. SimPy warehouse event simulator
 4. KPI dashboard and real/simulated provenance
 5. Forecasting and backtesting
@@ -67,3 +67,15 @@ No employer-internal data, personal worker records, or private operational metri
 
 ## License
 License selection pending. Do not assume permission to reuse proprietary datasets or employer materials.
+
+## Week 2: operational event ingestion
+
+Import the bundled synthetic dataset into the running database:
+
+```bash
+docker compose cp services/api/data/demo_events.csv api:/tmp/demo_events.csv
+docker compose exec api python -m app.import_events /tmp/demo_events.csv
+curl http://localhost:8000/api/v1/operations/summary
+```
+
+The importer validates timezone-aware timestamps, zone, units, colis, duration and provenance using Pydantic, rejects duplicate IDs and persists events with SQLAlchemy. The read-only summary groups by zone and provenance and computes units per recorded activity hour (not employee productivity). Schema initialization currently uses create_all; Alembic migrations, public dataset adapters and richer inventory/order tables remain pending. The existing dashboard still uses synthetic metrics. Tests use SQLite; PostgreSQL integration and CI verification remain outstanding.
