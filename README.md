@@ -38,7 +38,7 @@ python -m venv .venv
 source .venv/bin/activate  # Windows PowerShell: .venv\\Scripts\\Activate.ps1
 pip install -r requirements-dev.txt
 ruff check app tests
-pytest -q
+python -m pytest -q
 ```
 The tests do not need a running database. The readiness endpoint does.
 
